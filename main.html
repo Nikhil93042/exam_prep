@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Exam Prep Tutor</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body, html {
+      height: 100%;
+      font-family: 'Segoe UI', sans-serif;
+      overflow: hidden;
+      transition: background 0.4s ease;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      background: linear-gradient(120deg, #667eea, #764ba2);
+      color: #fff;
+    }
+
+    body.dark {
+      background: linear-gradient(120deg, #0f172a, #1e293b);
+      color: #f1f5f9;
+    }
+
+    .navbar, .footer {
+      padding: 15px 30px;
+      backdrop-filter: blur(10px);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .main-content {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+
+    .chat-container {
+      flex: 2;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .materials-container {
+      flex: 1;
+      padding: 20px;
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+      overflow-y: auto;
+      animation: slideIn 0.6s ease;
+    }
+
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+      margin-bottom: 10px;
+      background: #f3f4f6;
+      border-radius: 12px;
+    }
+
+    body.dark .messages {
+      background: #1e1e2f;
+    }
+
+    .message {
+      margin: 10px 0;
+      padding: 12px 18px;
+      border-radius: 16px;
+      max-width: 80%;
+      animation: fadeIn 0.4s ease forwards;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    .bot { background: #e0e7ff; color: #1e1e2f; align-self: flex-start; }
+    .user { background: #4f46e5; color: white; align-self: flex-end; }
+
+    .input-container {
+      display: flex;
+      background: #fff;
+      border-radius: 12px;
+    }
+
+    body.dark .input-container { background: #1e1e2f; }
+
+    input {
+      flex: 1;
+      padding: 14px;
+      border: none;
+      border-radius: 12px 0 0 12px;
+      font-size: 16px;
+      background: transparent;
+      color: inherit;
+    }
+
+    button {
+      background: #4f46e5;
+      border: none;
+      color: white;
+      padding: 14px 20px;
+      border-radius: 0 12px 12px 0;
+      cursor: pointer;
+    }
+
+    .toggle input {
+      width: 40px;
+      height: 20px;
+      appearance: none;
+      background: #ccc;
+      border-radius: 20px;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .toggle input:before {
+      content: '';
+      position: absolute;
+      top: 1px; left: 1px;
+      width: 18px; height: 18px;
+      background: #fff;
+      border-radius: 50%;
+      transition: 0.4s;
+    }
+
+    .toggle input:checked:before { transform: translateX(20px); }
+
+    .footer { text-align: center; font-size: 14px; }
+
+    @keyframes fadeIn {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(50px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .study-links h3 {
+      margin-bottom: 10px;
+    }
+
+    .study-links ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .study-links li {
+      background: rgba(255,255,255,0.2);
+      margin: 8px 0;
+      padding: 10px;
+      border-radius: 10px;
+      transition: background 0.3s;
+    }
+
+    .study-links li:hover {
+      background: rgba(255,255,255,0.3);
+    }
+
+    .animated-bg {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      z-index: -1;
+      background: radial-gradient(circle at 10% 20%, #ff7eb3 0%, transparent 40%),
+                  radial-gradient(circle at 80% 30%, #84fab0 0%, transparent 40%),
+                  radial-gradient(circle at 50% 80%, #8fd3f4 0%, transparent 40%);
+      background-size: 200% 200%;
+      animation: bgMove 15s ease infinite;
+    }
+
+    @keyframes bgMove {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="animated-bg"></div>
+
+  <div class="navbar">
+    <h2>📘 Exam Prep Tutor</h2>
+    <div class="toggle">
+      <label>🌙</label>
+      <input type="checkbox" id="darkToggle"/>
+    </div>
+  </div>
+
+  <div class="main-content">
+    <div class="chat-container">
+      <div class="messages" id="messages"></div>
+      <div class="input-container">
+        <input type="text" id="userInput" placeholder="Type your message..." />
+        <button onclick="handleInput()">Send</button>
+      </div>
+    </div>
+
+    <div class="materials-container">
+      <div class="study-links" id="studyLinks">
+        <h3>Study Resources 📚</h3>
+        <ul id="linksList">
+          <li>Select a subject to see links</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    &copy; 2025 ExamPrep Inc. | Learn smart 🚀
+  </div>
+
+  <script>
+    const messages = document.getElementById('messages');
+    const userInput = document.getElementById('userInput');
+    const linksList = document.getElementById('linksList');
+    const darkToggle = document.getElementById('darkToggle');
+
+    let step = 0, subject = '', difficulty = '', count = 5, questionType = '';
+
+    const resources = {
+      math: [
+        { name: "Khan Academy", url: "https://www.khanacademy.org/math" },
+        { name: "Paul's Online Math Notes", url: "http://tutorial.math.lamar.edu/" },
+        { name: "Brilliant.org", url: "https://brilliant.org" },
+      ],
+      science: [
+        { name: "CK12 Science", url: "https://www.ck12.org/science/" },
+        { name: "CrashCourse", url: "https://www.youtube.com/user/crashcourse" },
+        { name: "SciShow", url: "https://www.youtube.com/user/scishow" },
+      ],
+      history: [
+        { name: "BBC Bitesize History", url: "https://www.bbc.co.uk/bitesize/subjects/zxsfnbk" },
+        { name: "History.com", url: "https://www.history.com/" },
+        { name: "Ducksters History", url: "https://www.ducksters.com/history/" },
+      ],
+      computer: [
+        { name: "freeCodeCamp", url: "https://www.freecodecamp.org" },
+        { name: "W3Schools", url: "https://www.w3schools.com" },
+        { name: "GeeksforGeeks", url: "https://www.geeksforgeeks.org" },
+      ],
+    };
+
+    function updateStudyLinks(subject) {
+      const key = subject.toLowerCase();
+      const subjectKey = Object.keys(resources).find(k => key.includes(k)) || null;
+      linksList.innerHTML = '';
+      if (subjectKey) {
+        resources[subjectKey].forEach(link => {
+          const li = document.createElement('li');
+          li.innerHTML = `<a href="${link.url}" target="_blank">${link.name}</a>`;
+          linksList.appendChild(li);
+        });
+      } else {
+        linksList.innerHTML = '<li>No links available for this subject.</li>';
+      }
+    }
+
+    const appendMessage = (text, sender) => {
+      const msg = document.createElement('div');
+      msg.className = `message ${sender}`;
+      msg.innerText = text;
+      messages.appendChild(msg);
+      messages.scrollTop = messages.scrollHeight;
+    };
+
+    const botMessage = (text) => appendMessage(text, 'bot');
+    const userMessage = (text) => appendMessage(text, 'user');
+
+    const handleInput = () => {
+      const input = userInput.value.trim();
+      if (!input) return;
+
+      userMessage(input);
+      userInput.value = '';
+
+      switch (step) {
+        case 0:
+          subject = input;
+          botMessage("Nice! What difficulty level? (easy, medium, hard)");
+          updateStudyLinks(subject);
+          step++;
+          break;
+        case 1:
+          difficulty = input;
+          botMessage("How many questions would you like?");
+          step++;
+          break;
+        case 2:
+          count = parseInt(input);
+          botMessage("Type of questions: 'mcq' or 'subjective'?");
+          step++;
+          break;
+        case 3:
+          questionType = input.toLowerCase();
+          if (questionType === 'mcq') {
+            botMessage(`Generating ${count} MCQs on ${subject}...`);
+            fetchMCQs();
+          } else {
+            botMessage(`Generating ${count} subjective questions on ${subject}...`);
+            generateSubjective();
+          }
+          step++;
+          break;
+        default:
+          botMessage("Type 'restart' to begin again.");
+      }
+    };
+
+    const fetchMCQs = async () => {
+      try {
+        const res = await fetch(`https://opentdb.com/api.php?amount=${count}&difficulty=${difficulty}&type=multiple`);
+        const data = await res.json();
+        data.results.forEach((q, i) => {
+          const options = [...q.incorrect_answers, q.correct_answer].sort(() => Math.random() - 0.5);
+          botMessage(`${i+1}. ${decodeHTMLEntities(q.question)}\nOptions: ${options.map(o => decodeHTMLEntities(o)).join(', ')}`);
+          botMessage(`✅ Answer: ${decodeHTMLEntities(q.correct_answer)}`);
+        });
+      } catch (err) {
+        botMessage("Failed to fetch questions. Try again.");
+      }
+    };
+
+    const generateSubjective = () => {
+      for (let i = 1; i <= count; i++) {
+        botMessage(`${i}. Explain a key concept in ${subject}, topic ${i}.`);
+        botMessage(`✅ Answer: The concept ${i} in ${subject} relates to ...`);
+      }
+    };
+
+    const decodeHTMLEntities = (text) => {
+      const txt = document.createElement("textarea");
+      txt.innerHTML = text;
+      return txt.value;
+    };
+
+    darkToggle.addEventListener('change', () => {
+      document.body.classList.toggle('dark', darkToggle.checked);
+    });
+
+    botMessage("👋 Welcome! What subject are you preparing for?");
+    userInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') handleInput();
+    });
+  </script>
+</body>
+</html>
